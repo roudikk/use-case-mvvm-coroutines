@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">UseCaseTest</string>
+    <string name="background_task_finished">Background Task Finished !</string>
+</resources>

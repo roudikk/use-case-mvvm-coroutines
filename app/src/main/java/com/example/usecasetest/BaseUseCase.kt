@@ -32,7 +32,6 @@ abstract class BaseUseCase<T, in Params>(
      */
     open operator fun invoke(params: Params? = null): Job? {
         if (isActive()) restart() else reset()
-
         job = scope.launch {
             try {
                 channel = Channel()
@@ -43,7 +42,6 @@ abstract class BaseUseCase<T, in Params>(
                 handleException(throwable)
             }
         }
-
         return job
     }
 

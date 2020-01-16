@@ -12,6 +12,8 @@ abstract class BaseUseCase<T, in Params>(
     private val executionContext: CoroutineContext,
     private val postExecutionContext: CoroutineContext
 ) {
+    private var scope = CoroutineScope(executionContext)
+    private var postScope = CoroutineScope(postExecutionContext)
 
     protected var doBefore: () -> Unit = { }
     protected var doAfter: () -> Unit = { }
@@ -21,9 +23,8 @@ abstract class BaseUseCase<T, in Params>(
 
     private var job: Job? = null
     private var childJob: Job? = null
+
     private var channel: Channel<T>? = null
-    private var scope = CoroutineScope(executionContext)
-    private var postScope = CoroutineScope(postExecutionContext)
 
     abstract suspend fun run(channel: Channel<T>, params: Params? = null)
 

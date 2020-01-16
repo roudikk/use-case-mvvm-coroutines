@@ -12,7 +12,6 @@ class UploadUseCase(
     var throwError: Boolean = false
 
     override suspend fun run(channel: Channel<Upload>, params: Nothing?) {
-        println("UseCase: Running")
         var progress = 0
         throwError = false
         repeat(11) {
@@ -27,14 +26,12 @@ class UploadUseCase(
                     null
                 }
             )
-            println("UseCase: Sending result")
             channel.send(upload)
             progress += 10
             if (progress <= 100) {
                 delay(300)
             }
         }
-        println("UseCase: Closing channel")
         channel.close()
     }
 }

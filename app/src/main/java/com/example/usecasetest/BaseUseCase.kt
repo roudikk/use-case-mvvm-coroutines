@@ -37,10 +37,8 @@ abstract class BaseUseCase<T, in Params>(
         channel = Channel()
         job = scope.launch {
             try {
-                println("UseCase: Parent job starting")
                 postScope.launch { doBefore() }
                 childJob = scope.launch {
-                    println("UseCase: Child job starting")
                     try {
                         run(channel!!, params)
                     } catch (throwable: Throwable) {
@@ -51,7 +49,6 @@ abstract class BaseUseCase<T, in Params>(
                     }
                 }
                 for (i in channel!!) {
-                    println("UseCase: Value back")
                     postScope.launch { onResult(i) }
                 }
                 childJob?.join()
@@ -59,7 +56,6 @@ abstract class BaseUseCase<T, in Params>(
                 reset()
                 cleanup()
             } catch (throwable: Throwable) {
-                println("UseCase: Handling error: $throwable")
                 handleException(throwable)
                 if (throwable !is RestartCancellationException) {
                     cleanup()

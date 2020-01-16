@@ -1,12 +1,9 @@
 package com.example.usecasetest
 
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class MainViewModel : ViewModel() {
 
@@ -18,8 +15,8 @@ class MainViewModel : ViewModel() {
     fun upload() = uploadLiveData
     fun backgroundTask() = backgroundLiveData
 
-    private val uploadUseCase = UploadUseCase(viewModelScope.coroutineContext, Dispatchers.Main)
-    private val taskUseCase = TaskUseCase(Dispatchers.IO, Dispatchers.Main)
+    private val uploadUseCase = UploadUseCase(Dispatchers.IO, viewModelScope.coroutineContext)
+    private val taskUseCase = TaskUseCase(Dispatchers.IO, viewModelScope.coroutineContext)
 
     init {
         loadData()
@@ -39,21 +36,7 @@ class MainViewModel : ViewModel() {
     }
 
     private fun startBackgroundTask() {
-        val time = System.currentTimeMillis()
-        viewModelScope.launch {
-            stuff()
-            Log.d("Task", "isDone: ${System.currentTimeMillis() - time}")
-        }
-
-    }
-
-    private suspend fun stuff() {
-        var i = 0
-        withContext(Dispatchers.IO) {
-            repeat(1000000000) {
-                i++
-            }
-        }
+        taskUseCase.onResult { backgroundLiveData.value = null }.invoke()
     }
 
     fun cancel() {

@@ -70,7 +70,6 @@
         android:layout_marginBottom="16dp"
         android:fontFamily="bold"
         android:lineSpacingExtra="6dp"
-        android:textColor="#fff"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

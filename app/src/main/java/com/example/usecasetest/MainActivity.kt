@@ -16,6 +16,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        title = "Use Case Test"
+
         viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
 
         viewModel.upload().observe(this, Observer {

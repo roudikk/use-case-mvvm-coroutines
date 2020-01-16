@@ -32,7 +32,7 @@ abstract class BaseUseCase<T, in Params>(
         job = scope.launch {
             throwable = null
             postScope.launch { doBefore() }
-            launchChildJob(params)
+            startChannelAndRun(params)
             postChildJobCompletion()
         }
         return job
@@ -42,7 +42,7 @@ abstract class BaseUseCase<T, in Params>(
      * [channel] will run in [executionContext]
      * Elements emitted from [channel] will be emitted on [postExecutionContext]
      */
-    private suspend fun launchChildJob(params: Params?) {
+    private suspend fun startChannelAndRun(params: Params?) {
         channel = scope.produce {
             try {
                 run(channel, params)

@@ -4,7 +4,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.*
 import kotlin.coroutines.CoroutineContext
 
-@ExperimentalCoroutinesApi
 abstract class BaseUseCase<T, in Params>(
     private val executionContext: CoroutineContext,
     private val postExecutionContext: CoroutineContext

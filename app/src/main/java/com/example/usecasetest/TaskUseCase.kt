@@ -10,7 +10,7 @@ class TaskUseCase(
 
     override suspend fun run(channel: SendChannel<TaskCompletion>, params: Nothing?) {
         var i = 0
-        repeat(100) {
+        repeat(1000000000) {
             i++
         }
         channel.send(TaskCompletion())

@@ -8,7 +8,6 @@ import kotlinx.coroutines.channels.ClosedSendChannelException
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
-@Suppress("MemberVisibilityCanBePrivate", "CanBeParameter")
 abstract class BaseUseCase<T, in Params>(
     private val executionContext: CoroutineContext,
     private val postExecutionContext: CoroutineContext
@@ -28,55 +27,62 @@ abstract class BaseUseCase<T, in Params>(
 
     abstract suspend fun run(channel: Channel<T>, params: Params? = null)
 
+    /**
+     * [job] will run in [executionContext]
+     */
     open operator fun invoke(params: Params? = null): Job {
-        if (isActive()) {
-            restart()
-        } else {
-            reset()
-        }
-        channel = Channel()
+        if (isActive()) restart() else reset()
+
         job = scope.launch {
             try {
+                channel = Channel()
                 postScope.launch { doBefore() }
-                childJob = scope.launch {
-                    try {
-                        run(channel!!, params)
-                    } catch (throwable: Throwable) {
-                        handleException(throwable)
-                        if (throwable !is RestartCancellationException) {
-                            cleanup()
-                        }
-                    }
-                }
-                for (i in channel!!) {
-                    postScope.launch { onResult(i) }
-                }
-                childJob?.join()
-                postScope.launch { doAfter() }
-                reset()
-                cleanup()
+                launchChildJob(params)
+                postChildJobCompletion()
             } catch (throwable: Throwable) {
                 handleException(throwable)
-                if (throwable !is RestartCancellationException) {
-                    cleanup()
-                }
             }
         }
+
         return job!!
     }
 
     /**
-     * @param exception
+     * [childJob] will run in [executionContext]
+     * Elements emitted from [channel] will be emitted on [postExecutionContext]
+     */
+    private suspend fun launchChildJob(params: Params?) {
+        childJob = scope.launch {
+            try {
+                run(channel!!, params)
+            } catch (throwable: Throwable) {
+                handleException(throwable)
+            }
+        }
+        for (i in channel!!) {
+            postScope.launch { onResult(i) }
+        }
+        childJob?.join()
+    }
+
+    private fun postChildJobCompletion() {
+        postScope.launch { doAfter() }
+        reset()
+        cleanup()
+    }
+
+    /**
+     * @param throwable
      *
-     * Handles the given [exception]:
+     * Handles the given [throwable]:
      *  - Ignores [CancellationException], use case has been cancelled internally.
      *  - Ignores [RestartCancellationException], use case has been restarted.
      *  - Calls [onCancel] on [ForcedCancellationException], use case has been cancelled
      *  - Calls [doAfter] on [ClosedSendChannelException], use case finished sending results.
      *  - Calls [onError] otherwise, use case threw an error.
      */
-    private fun handleException(exception: Throwable?) {
-        when (exception) {
+    private fun handleException(throwable: Throwable?) {
+        when (throwable) {
             is ClosedSendChannelException -> postScope.launch { doAfter() }
             is ForcedCancellationException -> postScope.launch { onCancel() }
             is RestartCancellationException -> {
@@ -85,7 +91,10 @@ abstract class BaseUseCase<T, in Params>(
             is CancellationException -> {
                 // Ignores the exception.
             }
-            else -> postScope.launch { onError(exception) }
+            else -> postScope.launch { onError(throwable) }
+        }
+        if (throwable !is RestartCancellationException) {
+            cleanup()
         }
     }
 
@@ -109,7 +118,7 @@ abstract class BaseUseCase<T, in Params>(
      * Cancels the [BaseUseCase] with a [CancellationException].
      * This doesn't result in [onCancel] being called.
      */
-    fun reset() {
+    private fun reset() {
         job?.cancel()
         childJob?.cancel()
         channel?.close()
@@ -122,7 +131,7 @@ abstract class BaseUseCase<T, in Params>(
      * [cleanup] is also not called so [KotlinNullPointerException]
      * doesn't get throw when the job is restarted.
      */
-    fun restart() {
+    private fun restart() {
         job?.cancel(RestartCancellationException())
         childJob?.cancel(RestartCancellationException())
         channel?.close()

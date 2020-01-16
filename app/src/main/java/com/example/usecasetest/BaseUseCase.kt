@@ -30,7 +30,7 @@ abstract class BaseUseCase<T, in Params>(
     /**
      * [job] will run in [executionContext]
      */
-    open operator fun invoke(params: Params? = null): Job {
+    open operator fun invoke(params: Params? = null): Job? {
         if (isActive()) restart() else reset()
 
         job = scope.launch {
@@ -44,7 +44,7 @@ abstract class BaseUseCase<T, in Params>(
             }
         }
 
-        return job!!
+        return job
     }
 
     /**

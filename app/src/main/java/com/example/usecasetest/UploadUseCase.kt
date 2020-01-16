@@ -1,6 +1,6 @@
 package com.example.usecasetest
 
-import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.delay
 import kotlin.coroutines.CoroutineContext
 
@@ -11,7 +11,7 @@ class UploadUseCase(
 
     var throwError: Boolean = false
 
-    override suspend fun run(channel: Channel<Upload>, params: Nothing?) {
+    override suspend fun run(channel: SendChannel<Upload>, params: Nothing?) {
         var progress = 0
         throwError = false
         repeat(11) {

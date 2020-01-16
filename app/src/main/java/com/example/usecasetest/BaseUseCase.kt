@@ -1,13 +1,10 @@
 package com.example.usecasetest
 
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.ClosedSendChannelException
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.*
 import kotlin.coroutines.CoroutineContext
 
+@ExperimentalCoroutinesApi
 abstract class BaseUseCase<T, in Params>(
     private val executionContext: CoroutineContext,
     private val postExecutionContext: CoroutineContext
@@ -22,11 +19,10 @@ abstract class BaseUseCase<T, in Params>(
     protected var onCancel: () -> Unit = { }
 
     private var job: Job? = null
-    private var childJob: Job? = null
+    private var channel: ReceiveChannel<T>? = null
+    private var throwable: Throwable? = null
 
-    private var channel: Channel<T>? = null
-
-    abstract suspend fun run(channel: Channel<T>, params: Params? = null)
+    abstract suspend fun run(channel: SendChannel<T>, params: Params? = null)
 
     /**
      * [job] will run in [executionContext]
@@ -34,38 +30,35 @@ abstract class BaseUseCase<T, in Params>(
     open operator fun invoke(params: Params? = null): Job? {
         if (isActive()) restart() else reset()
         job = scope.launch {
-            try {
-                channel = Channel()
-                postScope.launch { doBefore() }
-                launchChildJob(params)
-                postChildJobCompletion()
-            } catch (throwable: Throwable) {
-                handleException(throwable)
-            }
+            throwable = null
+            postScope.launch { doBefore() }
+            launchChildJob(params)
+            postChildJobCompletion()
         }
         return job
     }
 
     /**
-     * [childJob] will run in [executionContext]
+     * [channel] will run in [executionContext]
      * Elements emitted from [channel] will be emitted on [postExecutionContext]
      */
     private suspend fun launchChildJob(params: Params?) {
-        childJob = scope.launch {
+        channel = scope.produce {
             try {
-                run(channel!!, params)
+                run(channel, params)
             } catch (throwable: Throwable) {
                 handleException(throwable)
             }
         }
-        for (i in channel!!) {
-            postScope.launch { onResult(i) }
+        channel?.consumeEach {
+            postScope.launch { onResult(it) }
         }
-        childJob?.join()
     }
 
     private fun postChildJobCompletion() {
-        postScope.launch { doAfter() }
+        if (throwable == null) {
+            postScope.launch { doAfter() }
+        }
         reset()
         cleanup()
     }
@@ -81,6 +74,7 @@ abstract class BaseUseCase<T, in Params>(
      *  - Calls [onError] otherwise, use case threw an error.
      */
     private fun handleException(throwable: Throwable?) {
+        this.throwable = throwable
         when (throwable) {
             is ClosedSendChannelException -> postScope.launch { doAfter() }
             is ForcedCancellationException -> postScope.launch { onCancel() }
@@ -105,11 +99,10 @@ abstract class BaseUseCase<T, in Params>(
     }
 
     /**
-     * Sets [job], [childJob] and [channel] to null.
+     * Sets [job], and [channel] to null.
      */
     private fun cleanup() {
         job = null
-        childJob = null
         channel = null
     }
 
@@ -119,8 +112,6 @@ abstract class BaseUseCase<T, in Params>(
      */
     private fun reset() {
         job?.cancel()
-        childJob?.cancel()
-        channel?.close()
         cleanup()
     }
 
@@ -132,8 +123,6 @@ abstract class BaseUseCase<T, in Params>(
      */
     private fun restart() {
         job?.cancel(RestartCancellationException())
-        childJob?.cancel(RestartCancellationException())
-        channel?.close()
     }
 
     /**
@@ -142,8 +131,6 @@ abstract class BaseUseCase<T, in Params>(
      */
     fun cancel() {
         job?.cancel(ForcedCancellationException())
-        childJob?.cancel(CancellationException())
-        channel?.close(CancellationException())
         cleanup()
     }
 

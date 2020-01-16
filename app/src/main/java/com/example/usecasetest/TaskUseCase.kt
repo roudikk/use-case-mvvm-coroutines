@@ -1,6 +1,6 @@
 package com.example.usecasetest
 
-import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.SendChannel
 import kotlin.coroutines.CoroutineContext
 
 class TaskUseCase(
@@ -8,7 +8,7 @@ class TaskUseCase(
     postExecutionContext: CoroutineContext
 ) : BaseUseCase<BaseUseCase.TaskCompletion, Nothing>(executionContext, postExecutionContext) {
 
-    override suspend fun run(channel: Channel<TaskCompletion>, params: Nothing?) {
+    override suspend fun run(channel: SendChannel<TaskCompletion>, params: Nothing?) {
         var i = 0
         repeat(100) {
             i++

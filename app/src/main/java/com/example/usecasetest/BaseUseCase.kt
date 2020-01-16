@@ -69,8 +69,9 @@ abstract class BaseUseCase<T, in Params>(
      * @param exception
      *
      * Handles the given [exception]:
-     *  - Ignores [CancellationException], use has been cancelled internally.
-     *  - Calls [onCancel] on [ForcedCancellationException], use case ahs been cancelled
+     *  - Ignores [CancellationException], use case has been cancelled internally.
+     *  - Ignores [RestartCancellationException], use case has been restarted.
+     *  - Calls [onCancel] on [ForcedCancellationException], use case has been cancelled
      *  - Calls [doAfter] on [ClosedSendChannelException], use case finished sending results.
      *  - Calls [onError] otherwise, use case threw an error.
      */

@@ -1,5 +1,7 @@
 package com.example.usecasetest
 
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -17,6 +19,13 @@ class MainActivity : AppCompatActivity() {
         viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
 
         viewModel.upload().observe(this, Observer {
+            progressBar.progressTintList = ColorStateList.valueOf(
+                if (it.progress == 100) {
+                    Color.parseColor("#4CAF50")
+                } else {
+                    Color.parseColor("#03A9F4")
+                }
+            )
             progressBar.progress = it.progress
             appendTextView("Progress: ${it.progress}, Result: ${it.result}")
         })
@@ -25,11 +34,26 @@ class MainActivity : AppCompatActivity() {
             appendTextView(
                 when (it) {
                     is MainViewModel.ViewState.Loading -> {
+                        progressBar.progressBackgroundTintList = ColorStateList.valueOf(
+                            Color.parseColor("#FFFFFF")
+                        )
                         textView.text = null
                         "Loading.."
                     }
-                    is MainViewModel.ViewState.Error -> "Error: ${it.exception}"
-                    is MainViewModel.ViewState.Cancelled -> "Cancelled!"
+                    is MainViewModel.ViewState.Error -> {
+                        progressBar.progressBackgroundTintList = ColorStateList.valueOf(
+                            Color.parseColor("#E91E63")
+                        )
+                        progressBar.progress = 0
+                        "Error: ${it.exception}"
+                    }
+                    is MainViewModel.ViewState.Cancelled -> {
+                        progressBar.progressBackgroundTintList = ColorStateList.valueOf(
+                            Color.parseColor("#FF9800")
+                        )
+                        progressBar.progress = 0
+                        "Cancelled!"
+                    }
                     is MainViewModel.ViewState.Success -> "Completed!"
                 }
             )

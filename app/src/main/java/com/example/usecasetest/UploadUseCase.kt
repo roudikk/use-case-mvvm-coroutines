@@ -30,7 +30,9 @@ class UploadUseCase(
             println("UseCase: Sending result")
             channel.send(upload)
             progress += 10
-            delay(300)
+            if (progress <= 100) {
+                delay(300)
+            }
         }
         println("UseCase: Closing channel")
         channel.close()

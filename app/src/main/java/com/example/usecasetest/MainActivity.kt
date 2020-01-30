@@ -24,6 +24,9 @@ class MainActivity : AppCompatActivity() {
             appendTextView(
                 when (it) {
                     is ViewState.Loading -> {
+                        progressBar.progressTintList = ColorStateList.valueOf(
+                            Color.parseColor("#03A9F4")
+                        )
                         progressBar.progressBackgroundTintList = ColorStateList.valueOf(
                             Color.parseColor("#FFFFFF")
                         )
@@ -45,7 +48,7 @@ class MainActivity : AppCompatActivity() {
                         "Cancelled!"
                     }
                     is ViewState.Success -> {
-                        progressBar.progressBackgroundTintList = ColorStateList.valueOf(
+                        progressBar.progressTintList = ColorStateList.valueOf(
                             Color.parseColor("#4CAF50")
                         )
                         it.result?.apply { progressBar.progress = it.result.progress }

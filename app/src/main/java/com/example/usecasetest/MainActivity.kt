@@ -45,6 +45,9 @@ class MainActivity : AppCompatActivity() {
                         "Cancelled!"
                     }
                     is ViewState.Success -> {
+                        progressBar.progressBackgroundTintList = ColorStateList.valueOf(
+                            Color.parseColor("#4CAF50")
+                        )
                         it.result?.apply { progressBar.progress = it.result.progress }
                         "Completed!"
                     }

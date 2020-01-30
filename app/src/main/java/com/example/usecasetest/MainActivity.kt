@@ -21,45 +21,43 @@ class MainActivity : AppCompatActivity() {
         viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
 
         viewModel.viewState().observe(this, Observer {
-            appendTextView(
-                when (it) {
-                    is ViewState.Loading -> {
-                        progressBar.progressTintList = ColorStateList.valueOf(
-                            Color.parseColor("#03A9F4")
-                        )
-                        progressBar.progressBackgroundTintList = ColorStateList.valueOf(
-                            Color.parseColor("#FFFFFF")
-                        )
-                        textView.text = null
-                        "Loading.."
-                    }
-                    is ViewState.Error -> {
-                        progressBar.progressBackgroundTintList = ColorStateList.valueOf(
-                            Color.parseColor("#E91E63")
-                        )
-                        progressBar.progress = 0
-                        "Error: ${it.throwable}"
-                    }
-                    is ViewState.Cancelled -> {
-                        progressBar.progressBackgroundTintList = ColorStateList.valueOf(
-                            Color.parseColor("#FF9800")
-                        )
-                        progressBar.progress = 0
-                        "Cancelled!"
-                    }
-                    is ViewState.Success -> {
-                        progressBar.progressTintList = ColorStateList.valueOf(
-                            Color.parseColor("#4CAF50")
-                        )
-                        it.result?.apply { progressBar.progress = it.result.progress }
-                        "Completed!"
-                    }
-                    is ViewState.Result -> {
-                        progressBar.progress = it.result.progress
-                        "Progress: ${it.result.progress}"
-                    }
+            when (it) {
+                is ViewState.Loading -> {
+                    progressBar.progressTintList = ColorStateList.valueOf(
+                        Color.parseColor("#03A9F4")
+                    )
+                    progressBar.progressBackgroundTintList = ColorStateList.valueOf(
+                        Color.parseColor("#FFFFFF")
+                    )
+                    textView.text = null
+                    appendTextView("Loading..")
                 }
-            )
+                is ViewState.Error -> {
+                    progressBar.progressBackgroundTintList = ColorStateList.valueOf(
+                        Color.parseColor("#E91E63")
+                    )
+                    progressBar.progress = 0
+                    appendTextView("Error: ${it.throwable}")
+                }
+                is ViewState.Cancelled -> {
+                    progressBar.progressBackgroundTintList = ColorStateList.valueOf(
+                        Color.parseColor("#FF9800")
+                    )
+                    progressBar.progress = 0
+                    appendTextView("Cancelled!")
+                }
+                is ViewState.Success -> {
+                    progressBar.progressTintList = ColorStateList.valueOf(
+                        Color.parseColor("#4CAF50")
+                    )
+                    it.result?.apply { progressBar.progress = it.result.progress }
+                    appendTextView("Completed!")
+                }
+                is ViewState.Result -> {
+                    progressBar.progress = it.result.progress
+                    appendTextView("Progress: ${it.result.progress}")
+                }
+            }
         })
 
         start.setOnClickListener { viewModel.loadData(true) }

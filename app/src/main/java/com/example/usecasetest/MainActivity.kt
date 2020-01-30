@@ -44,7 +44,10 @@ class MainActivity : AppCompatActivity() {
                         progressBar.progress = 0
                         "Cancelled!"
                     }
-                    is ViewState.Success -> "Completed!"
+                    is ViewState.Success -> {
+                        it.result?.apply { progressBar.progress = it.result.progress }
+                        "Completed!"
+                    }
                     is ViewState.Result -> {
                         progressBar.progress = it.result.progress
                         "Progress: ${it.result.progress}"
@@ -53,10 +56,10 @@ class MainActivity : AppCompatActivity() {
             )
         })
 
-        startOver.setOnClickListener { viewModel.loadData(true) }
+        start.setOnClickListener { viewModel.loadData(true) }
         cancel.setOnClickListener { viewModel.cancel() }
         error.setOnClickListener { viewModel.throwError() }
-    }
+    }xs
 
     private fun appendTextView(text: String) {
         textView.append("$text\n")

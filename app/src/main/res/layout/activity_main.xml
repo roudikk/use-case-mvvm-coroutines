@@ -8,7 +8,7 @@
     tools:context=".MainActivity">
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/startOver"
+        android:id="@+id/start"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -30,7 +30,7 @@
         android:text="@string/cancel"
         app:layout_constraintEnd_toStartOf="@id/error"
         app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintStart_toEndOf="@id/startOver"
+        app:layout_constraintStart_toEndOf="@id/start"
         app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.button.MaterialButton
@@ -58,7 +58,7 @@
         android:indeterminate="false"
         android:progressBackgroundTint="#FFF"
         android:progressTint="#03A9F4"
-        app:layout_constraintTop_toBottomOf="@id/startOver" />
+        app:layout_constraintTop_toBottomOf="@id/start" />
 
     <TextView
         android:id="@+id/textView"

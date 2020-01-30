@@ -59,7 +59,7 @@ class MainActivity : AppCompatActivity() {
         start.setOnClickListener { viewModel.loadData(true) }
         cancel.setOnClickListener { viewModel.cancel() }
         error.setOnClickListener { viewModel.throwError() }
-    }xs
+    }
 
     private fun appendTextView(text: String) {
         textView.append("$text\n")

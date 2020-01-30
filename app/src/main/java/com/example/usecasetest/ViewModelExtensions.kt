@@ -15,7 +15,7 @@ fun <T, Params> BaseUseCase<T, Params>.loadWithLiveData(viewStateLiveData: Mutab
             viewStateLiveData.value = ViewState.Error(it)
         }
         .doAfter {
-            viewStateLiveData.value = ViewState.Success((viewStateLiveData.value as ViewState.Result?)?.result)
+            viewStateLiveData.value = ViewState.Success((viewStateLiveData.value as? ViewState.Result?)?.result)
         }
     return this
 }

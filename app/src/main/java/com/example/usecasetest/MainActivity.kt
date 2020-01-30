@@ -23,33 +23,28 @@ class MainActivity : AppCompatActivity() {
         viewModel.viewState().observe(this, Observer {
             when (it) {
                 is ViewState.Loading -> {
-                    progressBar.progressTintList = ColorStateList.valueOf(
-                        Color.parseColor("#03A9F4")
-                    )
-                    progressBar.progressBackgroundTintList = ColorStateList.valueOf(
-                        Color.parseColor("#FFFFFF")
-                    )
+                    progressBar.progressTintList =
+                        ColorStateList.valueOf(Color.parseColor("#03A9F4"))
+                    progressBar.progressBackgroundTintList =
+                        ColorStateList.valueOf(Color.parseColor("#FFFFFF"))
                     textView.text = null
                     appendTextView("Loading..")
                 }
                 is ViewState.Error -> {
-                    progressBar.progressBackgroundTintList = ColorStateList.valueOf(
-                        Color.parseColor("#E91E63")
-                    )
+                    progressBar.progressBackgroundTintList =
+                        ColorStateList.valueOf(Color.parseColor("#E91E63"))
                     progressBar.progress = 0
                     appendTextView("Error: ${it.throwable}")
                 }
                 is ViewState.Cancelled -> {
-                    progressBar.progressBackgroundTintList = ColorStateList.valueOf(
-                        Color.parseColor("#FF9800")
-                    )
+                    progressBar.progressBackgroundTintList =
+                        ColorStateList.valueOf(Color.parseColor("#FF9800"))
                     progressBar.progress = 0
                     appendTextView("Cancelled!")
                 }
                 is ViewState.Success -> {
-                    progressBar.progressTintList = ColorStateList.valueOf(
-                        Color.parseColor("#4CAF50")
-                    )
+                    progressBar.progressTintList =
+                        ColorStateList.valueOf(Color.parseColor("#4CAF50"))
                     it.result?.apply { progressBar.progress = it.result.progress }
                     appendTextView("Completed!")
                 }

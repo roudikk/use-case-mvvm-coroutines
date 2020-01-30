@@ -32,6 +32,4 @@ class MainViewModel : ViewModel() {
     fun throwError() {
         uploadUseCase.throwError = true
     }
-
-
 }

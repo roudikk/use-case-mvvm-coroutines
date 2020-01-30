@@ -3,7 +3,6 @@ package com.example.usecasetest
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -21,49 +20,37 @@ class MainActivity : AppCompatActivity() {
 
         viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
 
-        viewModel.upload().observe(this, Observer {
-            progressBar.progressTintList = ColorStateList.valueOf(
-                if (it.progress == 100) {
-                    Color.parseColor("#4CAF50")
-                } else {
-                    Color.parseColor("#03A9F4")
-                }
-            )
-            progressBar.progress = it.progress
-            appendTextView("Progress: ${it.progress}, Result: ${it.result}")
-        })
-
         viewModel.viewState().observe(this, Observer {
             appendTextView(
                 when (it) {
-                    is MainViewModel.ViewState.Loading -> {
+                    is ViewState.Loading -> {
                         progressBar.progressBackgroundTintList = ColorStateList.valueOf(
                             Color.parseColor("#FFFFFF")
                         )
                         textView.text = null
                         "Loading.."
                     }
-                    is MainViewModel.ViewState.Error -> {
+                    is ViewState.Error -> {
                         progressBar.progressBackgroundTintList = ColorStateList.valueOf(
                             Color.parseColor("#E91E63")
                         )
                         progressBar.progress = 0
-                        "Error: ${it.exception}"
+                        "Error: ${it.throwable}"
                     }
-                    is MainViewModel.ViewState.Cancelled -> {
+                    is ViewState.Cancelled -> {
                         progressBar.progressBackgroundTintList = ColorStateList.valueOf(
                             Color.parseColor("#FF9800")
                         )
                         progressBar.progress = 0
                         "Cancelled!"
                     }
-                    is MainViewModel.ViewState.Success -> "Completed!"
+                    is ViewState.Success -> "Completed!"
+                    is ViewState.Result -> {
+                        progressBar.progress = it.result.progress
+                        "Progress: ${it.result.progress}"
+                    }
                 }
             )
-        })
-
-        viewModel.backgroundTask().observe(this, Observer {
-            Toast.makeText(this, R.string.background_task_finished, Toast.LENGTH_LONG).show()
         })
 
         startOver.setOnClickListener { viewModel.loadData(true) }

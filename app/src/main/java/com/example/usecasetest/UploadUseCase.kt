@@ -7,11 +7,16 @@ import kotlin.coroutines.CoroutineContext
 class UploadUseCase(
     executionContext: CoroutineContext,
     postExecutionContext: CoroutineContext
-) : BaseUseCase<Upload, Nothing>(executionContext, postExecutionContext) {
+) : BaseUseCase<Upload, UploadUseCase.Params>(executionContext, postExecutionContext) {
 
     var throwError: Boolean = false
 
-    override suspend fun run(channel: SendChannel<Upload>, params: Nothing?) {
+    /**
+     * [channel].send() to send out the result to the consumer
+     * [channel].close() when finish sending out results.
+     */
+    override suspend fun run(channel: SendChannel<Upload>, params: Params?) {
+        requireNotNull(params)
         var progress = 0
         throwError = false
         repeat(11) {
@@ -34,6 +39,9 @@ class UploadUseCase(
         }
         channel.close()
     }
+
+    data class Params(val sessionId: String)
 }
+
 
 data class Upload(val progress: Int, val result: String? = null)
